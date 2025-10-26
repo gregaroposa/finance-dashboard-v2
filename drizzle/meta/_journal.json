@@ -8,6 +8,13 @@
       "when": 1761341027669,
       "tag": "0000_breezy_iron_fist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1761499748139,
+      "tag": "0001_lumpy_mysterio",
+      "breakpoints": true
     }
   ]
 }
