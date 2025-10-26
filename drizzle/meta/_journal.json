@@ -15,6 +15,13 @@
       "when": 1761499748139,
       "tag": "0001_lumpy_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761504782768,
+      "tag": "0002_broad_gorgon",
+      "breakpoints": true
     }
   ]
 }
