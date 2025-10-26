@@ -144,6 +144,41 @@ const app = new Hono()
     }
   )
   .post(
+    "/bulk-create",
+    clerkMiddleware(),
+    zValidator(
+      "json",
+      z.array(
+        insertTransactionSchema.omit({
+          id: true,
+        })
+      )
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      const values = c.req.valid("json");
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      type NewTransaction = typeof transactions.$inferInsert;
+      const insertValues: NewTransaction[] = (
+        values as unknown as Omit<NewTransaction, "id">[]
+      ).map((value) => ({
+        id: createId(),
+        ...value,
+      }));
+
+      const data = await db
+        .insert(transactions)
+        .values(insertValues)
+        .returning();
+
+      return c.json({ data });
+    }
+  )
+  .post(
     "bulk-delete",
     clerkMiddleware(),
     zValidator(
