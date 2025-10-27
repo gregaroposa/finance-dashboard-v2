@@ -34,10 +34,12 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // Only apply date range filtering when provided via query params.
-      // This ensures newly imported transactions outside the last 30 days are visible by default.
-      const startDate = from ? parse(from, "yyyy-MM-dd", new Date()) : undefined;
-      const endDate = to ? parse(to, "yyyy-MM-dd", new Date()) : undefined;
+      const defaultTo = new Date();
+      const defaultFrom = subDays(defaultTo, 30);
+      const startDate = from
+        ? parse(from, "yyyy-MM-dd", new Date())
+        : defaultFrom;
+      const endDate = to ? parse(to, "yyyy-MM-dd", new Date()) : defaultTo;
 
       const data = await db
         .select({
@@ -58,8 +60,8 @@ const app = new Hono()
           and(
             accountId ? eq(transactions.accountId, accountId) : undefined,
             eq(accounts.userId, auth.userId),
-            startDate ? gte(transactions.date, startDate) : undefined,
-            endDate ? lte(transactions.date, endDate) : undefined
+            gte(transactions.date, startDate),
+            lte(transactions.date, endDate)
           )
         )
         .orderBy(desc(transactions.date));
