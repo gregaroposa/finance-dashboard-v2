@@ -2,9 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ImportTable } from "./import-table";
-import { index } from "drizzle-orm/mysql-core";
-import { convertAmountToMiliunits } from "@/lib/utils";
-import { format, parse } from "date-fns";
+import { convertAmountToMiliunits, parseAmountFromString } from "@/lib/utils";
+import { format, parse, isValid } from "date-fns";
 
 const dateFormat = "yyyy-MM-dd HH:mm:ss";
 const outputFormat = "yyyy-MM-dd";
@@ -55,6 +54,32 @@ export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
   const progress = Object.values(selectedColumns).filter(Boolean).length;
 
   const handleContinue = () => {
+    const inputDateFormats = [
+      "yyyy-MM-dd HH:mm:ss",
+      "yyyy-MM-dd",
+      "yyyy-MM-dd'T'HH:mm:ss",
+      "yyyy-MM-dd'T'HH:mm",
+      "dd/MM/yyyy",
+      "dd/MM/yyyy HH:mm:ss",
+      "MM/dd/yyyy",
+      "MM/dd/yyyy HH:mm:ss",
+      "dd.MM.yyyy",
+      "dd.MM.yyyy HH:mm:ss",
+      "d.M.yyyy",
+      "d.M.yyyy H:mm:ss",
+      "yyyy/MM/dd",
+      "yyyy/MM/dd HH:mm:ss",
+    ];
+
+    const parseToValidDate = (value: string) => {
+      for (const fmt of inputDateFormats) {
+        const d = parse(value, fmt, new Date());
+        if (isValid(d)) return d;
+      }
+      const fallback = new Date(value);
+      return isValid(fallback) ? fallback : null;
+    };
+
     const getColumnIndex = (column: string) => {
       return column.split("_")[1];
     };
@@ -89,11 +114,16 @@ export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
       }, {});
     });
 
-    const formattedData = arrayOfData.map((item) => ({
-      ...item,
-      amount: convertAmountToMiliunits(parseFloat(item.amount)),
-      date: format(parse(item.date, dateFormat, new Date()), outputFormat),
-    }));
+    const formattedData = arrayOfData.map((item) => {
+      const parsedAmount = parseAmountFromString(String(item.amount ?? ""));
+      const parsedDate = parseToValidDate(String(item.date ?? ""));
+
+      return {
+        ...item,
+        amount: convertAmountToMiliunits(parsedAmount),
+        date: parsedDate ? format(parsedDate, outputFormat) : String(item.date ?? ""),
+      };
+    });
 
     onSubmit(formattedData);
   };
