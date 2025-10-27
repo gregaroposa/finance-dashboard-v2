@@ -19,7 +19,9 @@ export function convertAmountToMiliunits(amount: number) {
 //  "1.234,56" -> 1234.56
 //  "1,234.56" -> 1234.56
 //  "-€ 10,50" -> -10.5
-export function parseAmountFromString(value: string | undefined | null): number {
+export function parseAmountFromString(
+  value: string | undefined | null
+): number {
   if (!value) return 0;
   const raw = String(value).trim();
   if (!raw) return 0;
@@ -43,12 +45,8 @@ export function parseAmountFromString(value: string | undefined | null): number 
   } else {
     // Determine which is the decimal separator: whichever appears last
     const decimalIndex = Math.max(lastDot, lastComma);
-    const integerPart = cleaned
-      .slice(0, decimalIndex)
-      .replace(/[.,]/g, "");
-    const fractionPart = cleaned
-      .slice(decimalIndex + 1)
-      .replace(/[.,]/g, "");
+    const integerPart = cleaned.slice(0, decimalIndex).replace(/[.,]/g, "");
+    const fractionPart = cleaned.slice(decimalIndex + 1).replace(/[.,]/g, "");
 
     normalized = integerPart + "." + fractionPart;
   }
@@ -56,4 +54,12 @@ export function parseAmountFromString(value: string | undefined | null): number 
   const result = parseFloat(normalized);
   if (Number.isNaN(result)) return 0;
   return isNegative ? -result : result;
+}
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+  }).format(value);
 }

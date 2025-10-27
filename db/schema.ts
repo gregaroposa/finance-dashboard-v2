@@ -41,8 +41,7 @@ export const transactions = pgTable("transactions", {
   categoryId: text("category_id")
     .references(() => categories.id, {
       onDelete: "set null",
-    })
-    .notNull(),
+    }),
 });
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -58,4 +57,5 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
   date: z.coerce.date(),
+  categoryId: z.string().nullable().optional(),
 });

@@ -22,6 +22,13 @@
       "when": 1761504782768,
       "tag": "0002_broad_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761593832184,
+      "tag": "0003_fast_paper_doll",
+      "breakpoints": true
     }
   ]
 }
