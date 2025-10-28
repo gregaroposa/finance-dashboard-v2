@@ -53,7 +53,7 @@ export const AmountInput = ({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            Use [+] for income and [–] for expenses
+            Use [+] for income and [-] for expenses
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -64,6 +64,8 @@ export const AmountInput = ({
         value={value}
         decimalsLimit={2}
         decimalScale={2}
+        decimalSeparator="," 
+        groupSeparator="."
         onValueChange={onChange}
         disabled={disabled}
       />
@@ -74,3 +76,4 @@ export const AmountInput = ({
     </div>
   );
 };
+
