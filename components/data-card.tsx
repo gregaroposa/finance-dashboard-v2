@@ -12,8 +12,6 @@ import { CountUp } from "@/components/count-up";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { cn, formatCurrency, formatPercentage } from "@/lib/utils";
-import { Car } from "lucide-react";
-import { date } from "zod";
 
 const boxVariant = cva("rounded-md p-3 shrink-0", {
   variants: {
@@ -93,7 +91,8 @@ export const DataCard = ({
             percentageChange < 0 && "text-rose-500"
           )}
         >
-          {formatPercentage(percentageChange)} from last period
+          {formatPercentage(percentageChange, { addPrefix: true })} from last
+          period
         </p>
       </CardContent>
     </Card>
