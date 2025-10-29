@@ -1,0 +1,19 @@
+*** Begin Patch
+*** Update File: components/pie-variant.tsx
+@@
+-export const PieVariant = ({ data }: Props) => {
+-  return (
++export const PieVariant = ({ data }: Props) => {
++  const total = data.reduce((sum, item) => sum + (Number.isFinite(item.value) ? item.value : 0), 0);
++  return (
+@@
+                       <span className="text-sm">
+-                        {formatPercentage(entry.payload.percent * 100)}
++                        {(() => {
++                          const raw = entry?.payload?.value ?? 0;
++                          const percent = total > 0 ? (raw / total) * 100 : 0;
++                          return formatPercentage(percent);
++                        })()}
+                       </span>
+@@
+*** End Patch
