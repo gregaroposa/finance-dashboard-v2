@@ -11,7 +11,7 @@ export const WelcomeMsg = () => {
         Welcome Back{isLoaded ? ", " : " "}
         {user?.firstName}👋🏻
       </h2>
-      <p className="text-sm lg:text-base text-[#89b6fd]">
+      <p className="text-sm lg:text-base text-[#d1b3eb]">
         This is your Financial Overview Report
       </p>
     </div>

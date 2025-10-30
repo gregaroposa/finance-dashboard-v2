@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
           </Button>
         )}
       </div>
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-lg border dark:border-[#44475A]">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

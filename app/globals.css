@@ -45,25 +45,36 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
+  /* Dracula – Light */
+  --background: hsl(231 15% 100%);
+  --foreground: hsl(60 30% 10%);
+
+  --card: hsl(232 14% 98%);
+  --card-foreground: hsl(60 30% 5%);
+
+  --popover: hsl(231 15% 94%);
+  --popover-foreground: hsl(60 30% 20%);
+
+  --primary: hsl(265 89% 78%);
+  --primary-foreground: hsl(60 30% 96%);
+
+  --secondary: hsl(326 100% 74%);
+  --secondary-foreground: hsl(60 30% 96%);
+
+  --muted: hsl(232 14% 98%);
+  --muted-foreground: hsl(60 30% 20%);
+
+  --accent: hsl(225 27% 70%);
+  --accent-foreground: hsl(60 30% 10%);
+
+  --destructive: hsl(0 100% 67%);
+  /* no explicit destructive-foreground token in theme map */
+
+  /* Lighten border in dark mode for clearer table/grid lines */
+  --border: hsl(232 14% 45%);
+  --input: hsl(225 27% 51%);
+  --ring: hsl(225 27% 51%);
+  --chart-1: oklch(71.817% 0.14969 42.833);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
@@ -79,28 +90,39 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
+  /* Dracula – Dark */
+  --background: hsl(231 15% 18%);
+  --foreground: hsl(60 30% 96%);
+
+  /* Make cards slightly lighter than the dark background */
+  --card: hsl(231 15% 23%);
+  --card-foreground: hsl(60 30% 96%);
+
+  --popover: hsl(231 15% 18%);
+  --popover-foreground: hsl(60 30% 96%);
+
+  --primary: hsl(265 89% 78%);
+  --primary-foreground: hsl(60 30% 96%);
+
+  --secondary: hsl(326 100% 74%);
+  --secondary-foreground: hsl(60 30% 96%);
+
+  --muted: hsl(232 14% 31%);
+  --muted-foreground: hsl(60 30% 96%);
+
+  --accent: hsl(225 27% 51%);
+  --accent-foreground: hsl(60 30% 96%);
+
+  --destructive: hsl(0 100% 67%);
+  /* no explicit destructive-foreground token in theme map */
+
+  --border: hsl(232 14% 31%);
+  --input: hsl(225 27% 51%);
+  --ring: hsl(225 27% 51%);
+  --chart-1: oklch(62.457% 0.14765 268.326);
+  --chart-2: oklch(69.905% 0.12209 167.027);
+  --chart-3: oklch(82.627% 0.13201 74.991);
+  --chart-4: oklch(76.466% 0.15221 308.433);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.208 0.042 265.755);
   --sidebar-foreground: oklch(0.984 0.003 247.858);

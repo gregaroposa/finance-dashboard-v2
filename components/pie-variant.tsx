@@ -10,7 +10,13 @@ import {
 import { formatPercentage } from "@/lib/utils";
 import { CategoryTooltip } from "@/components/category-tooltip";
 
-const COLORS = ["#0062FF", "#12C6FF", "#FF647F", "#FF9354"];
+const COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
 
 type Props = {
   data: {
@@ -81,7 +87,7 @@ export const PieVariant = ({ data }: Props) => {
           outerRadius={90}
           innerRadius={60}
           paddingAngle={2}
-          fill="8884d8"
+          fill="var(--chart-1)"
           dataKey={"value"}
           labelLine={false}
         >
