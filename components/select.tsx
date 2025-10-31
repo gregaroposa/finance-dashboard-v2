@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { SingleValue } from "react-select";
 import CreateableSelect from "react-select/creatable";
@@ -23,6 +23,20 @@ export const Select = ({
   placeholder,
 }: Props) => {
   const { resolvedTheme } = useTheme();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | undefined>();
+
+  // Ensure the menu portal mounts inside the nearest Sheet/Dialog content
+  // to avoid being inert/aria-hidden by Radix overlays.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const el = containerRef.current;
+    // Prefer the closest open sheet/dialog content; fall back to body.
+    const target = (el?.closest(
+      '[data-slot="sheet-content"], [data-slot="dialog-content"]'
+    ) as HTMLElement | null) ?? document.body;
+    setPortalTarget(target);
+  }, []);
   const onSelect = (option: SingleValue<{ label: string; value: string }>) => {
     onChange(option?.value);
   };
@@ -32,10 +46,11 @@ export const Select = ({
   }, [options, value]);
 
   return (
-    <CreateableSelect
+    <div ref={containerRef}>
+      <CreateableSelect
       placeholder={placeholder}
       className="text-sm h-10"
-      menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+      menuPortalTarget={portalTarget}
       menuPosition="fixed"
       styles={{
         control: (base, state) => ({
@@ -109,7 +124,9 @@ export const Select = ({
         }),
         menuPortal: (base) => ({
           ...base,
+          // Keep the portal on top within the current stacking context
           zIndex: 9999,
+          pointerEvents: "auto",
         }),
       }}
       value={formattedValue}
@@ -118,5 +135,6 @@ export const Select = ({
       onCreateOption={onCreate}
       isDisabled={disabled}
     />
+    </div>
   );
 };
