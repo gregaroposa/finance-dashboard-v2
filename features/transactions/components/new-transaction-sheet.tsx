@@ -32,10 +32,12 @@ export const NewTransactionSheet = () => {
 
   const categoryQuery = useGetCategories();
   const categoryMutation = useCreateCategory();
-  const onCreateCategory = (name: string) =>
-    categoryMutation.mutate({
-      name,
-    });
+  const onCreateCategory = (name: string) => {
+    const payload = { name } as unknown as Parameters<
+      typeof categoryMutation.mutate
+    >[0];
+    categoryMutation.mutate(payload);
+  };
   const categoryOptions = (categoryQuery.data ?? []).map((category) => ({
     label: category.name,
     value: category.id,
@@ -43,10 +45,12 @@ export const NewTransactionSheet = () => {
 
   const accountQuery = useGetAccounts();
   const accountMutation = useCreateAccount();
-  const onCreateAccount = (name: string) =>
-    accountMutation.mutate({
-      name,
-    });
+  const onCreateAccount = (name: string) => {
+    const payload = { name } as unknown as Parameters<
+      typeof accountMutation.mutate
+    >[0];
+    accountMutation.mutate(payload);
+  };
   const accountOptions = (accountQuery.data ?? []).map((account) => ({
     label: account.name,
     value: account.id,
@@ -60,7 +64,8 @@ export const NewTransactionSheet = () => {
   const isLoading = categoryQuery.isLoading || accountQuery.isLoading;
 
   const onSubmit = (values: FormValues) => {
-    createMutation.mutate(values, {
+    const payload = values as unknown as Parameters<typeof createMutation.mutate>[0];
+    createMutation.mutate(payload, {
       onSuccess: () => {
         onClose();
       },

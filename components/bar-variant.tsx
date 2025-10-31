@@ -31,7 +31,9 @@ export const BarVariant = ({ data }: Props) => {
           style={{ fontSize: "12px" }}
           tickMargin={16}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip<number, string>
+          content={(props) => <CustomTooltip {...props} />}
+        />
         <Bar dataKey="income" fill="#10b981" className="drop-shadow-sm" />
         <Bar dataKey="expenses" fill="#f43f5e" className="drop-shadow-sm" />
       </BarChart>

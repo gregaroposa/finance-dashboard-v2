@@ -1,6 +1,7 @@
 ﻿import { z } from "zod";
 import { Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 
 const formSchema = insertAccountSchema.pick({
@@ -23,8 +23,8 @@ type FormValues = z.input<typeof formSchema>;
 
 type Props = {
   id?: string;
-  defaultValues?: FormValues;
-  onSubmit: (values: FormValues) => void;
+  defaultValues?: { name: string };
+  onSubmit: (values: { name: string }) => void;
   onDelete?: () => void;
   disabled?: boolean;
 };
@@ -36,12 +36,12 @@ export const AccountForm = ({
   onDelete,
   disabled,
 }: Props) => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<{ name: string }>({
+    resolver: zodResolver(formSchema) as unknown as Resolver<{ name: string }>,
     defaultValues: defaultValues,
   });
 
-  const handleSubmit = (values: FormValues) => {
+  const handleSubmit = (values: { name: string }) => {
     onSubmit(values);
   };
 
@@ -55,8 +55,8 @@ export const AccountForm = ({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="grid w-full max-w-sm gap-4 mx-auto lg:mx-0"
       >
-        <FormField<FormValues>
-          name="name"
+        <FormField
+          name={"name" as import("react-hook-form").FieldPath<{ name: string }>}
           control={form.control}
           render={({ field }) => (
             <FormItem>

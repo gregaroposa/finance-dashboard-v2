@@ -22,8 +22,9 @@ export const NewAccountSheet = () => {
 
   const mutation = useCreateAccount();
 
-  const onSubmit = (values: FormValues) => {
-    mutation.mutate(values, {
+  const onSubmit = (values: { name: string }) => {
+    const payload = values as unknown as Parameters<typeof mutation.mutate>[0];
+    mutation.mutate(payload, {
       onSuccess: () => {
         onClose();
       },

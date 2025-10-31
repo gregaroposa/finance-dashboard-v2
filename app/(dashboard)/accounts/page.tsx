@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { Loader2, Plus } from "lucide-react";
 
 import { useNewAccount } from "@/features/accounts/hooks/use-new-account";
@@ -39,8 +41,9 @@ const AccountsPage = () => {
 
   return (
     <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
-      <Card borderless shadowless className="drop-shadow-sm">
-        <CardHeader className="lg:grid-cols-[1fr_auto] lg:items-center lg:gap-y-0">
+      <Suspense>
+        <Card borderless shadowless className="drop-shadow-sm">
+          <CardHeader className="lg:grid-cols-[1fr_auto] lg:items-center lg:gap-y-0">
           <CardTitle className="text-xl line-clamp-1">Accounts Page</CardTitle>
           <Button
             onClick={newAccount.onOpen}
@@ -63,9 +66,12 @@ const AccountsPage = () => {
             disabled={isDisabled}
           />
         </CardContent>
-      </Card>
+        </Card>
+      </Suspense>
     </div>
   );
 };
 
 export default AccountsPage;
+
+

@@ -39,8 +39,11 @@ export const EditAccountSheet = () => {
 
   const isLoading = accountQuery.isLoading;
 
-  const onSubmit = (values: FormValues) => {
-    editMutation.mutate(values, {
+  const onSubmit = (values: { name: string }) => {
+    const payload = values as unknown as Parameters<
+      typeof editMutation.mutate
+    >[0];
+    editMutation.mutate(payload, {
       onSuccess: () => {
         onClose();
       },

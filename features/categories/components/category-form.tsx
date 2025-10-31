@@ -22,8 +22,8 @@ type FormValues = z.input<typeof formSchema>;
 
 type Props = {
   id?: string;
-  defaultValues?: FormValues;
-  onSubmit: (values: FormValues) => void;
+  defaultValues?: { name: string };
+  onSubmit: (values: { name: string }) => void;
   onDelete?: () => void;
   disabled?: boolean;
 };
@@ -35,12 +35,14 @@ export const CategoryForm = ({
   onDelete,
   disabled,
 }: Props) => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<{ name: string }>({
+    resolver: zodResolver(formSchema) as unknown as import("react-hook-form").Resolver<{
+      name: string;
+    }>,
     defaultValues: defaultValues,
   });
 
-  const handleSubmit = (values: FormValues) => {
+  const handleSubmit = (values: { name: string }) => {
     onSubmit(values);
   };
 
@@ -54,8 +56,8 @@ export const CategoryForm = ({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="grid w-full max-w-sm gap-4 mx-auto lg:mx-0"
       >
-        <FormField<FormValues>
-          name="name"
+        <FormField
+          name={"name" as import("react-hook-form").FieldPath<{ name: string }>}
           control={form.control}
           render={({ field }) => (
             <FormItem>

@@ -67,10 +67,11 @@ export const TransactionForm = ({
     const amount = parseAmountFromString(values.amount);
     const amountInMiliunits = convertAmountToMiliunits(amount);
 
-    onSubmit({
+    const payload = {
       ...values,
       amount: amountInMiliunits,
-    });
+    } as unknown as ApiFormValues;
+    onSubmit(payload);
   };
 
   const handleDelete = () => {
@@ -90,7 +91,7 @@ export const TransactionForm = ({
             <FormItem>
               <FormControl>
                 <DatePicker
-                  value={field.value}
+                  value={field.value as Date | undefined}
                   onChange={field.onChange}
                   disabled={disabled}
                 />
@@ -109,7 +110,7 @@ export const TransactionForm = ({
                   placeholder="Select an account"
                   options={accountOptions}
                   onCreate={onCreateAccount}
-                  value={field.value}
+                  value={field.value as string}
                   onChange={field.onChange}
                   disabled={disabled}
                 />
@@ -128,7 +129,7 @@ export const TransactionForm = ({
                   placeholder="Select a category"
                   options={categoryOptions}
                   onCreate={onCreateCategory}
-                  value={field.value}
+                  value={field.value as string | null | undefined}
                   onChange={field.onChange}
                   disabled={disabled}
                 />
@@ -146,7 +147,11 @@ export const TransactionForm = ({
                 <Input
                   disabled={disabled}
                   placeholder="Add a payee"
-                  {...field}
+                  name={field.name}
+                  ref={field.ref}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  value={field.value as string}
                 />
               </FormControl>
             </FormItem>
@@ -160,7 +165,8 @@ export const TransactionForm = ({
               <FormLabel>Amount</FormLabel>
               <FormControl>
                 <AmountInput
-                  {...field}
+                  value={field.value as string}
+                  onChange={field.onChange as (v: string | undefined) => void}
                   disabled={disabled}
                   placeholder="0,00"
                 />
@@ -176,8 +182,11 @@ export const TransactionForm = ({
               <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea
-                  {...field}
-                  value={field.value ?? ""}
+                  name={field.name}
+                  ref={field.ref}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  value={(field.value as string | null | undefined) ?? ""}
                   disabled={disabled}
                   placeholder="Add notes (optional)"
                 />

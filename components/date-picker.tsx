@@ -1,7 +1,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { SelectHandler } from "react-day-picker";
+import type { OnSelectHandler } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
 
 type Props = {
   value?: Date;
-  onChange?: SelectHandler<{ mode: "single" }>;
+  onChange?: OnSelectHandler<Date | undefined>;
   disabled?: boolean;
 };
 

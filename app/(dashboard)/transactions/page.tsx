@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import type { ParseResult } from "papaparse";
 import { Loader2, Plus } from "lucide-react";
 
 import { transactions as transactionSchema } from "@/db/schema";
@@ -24,18 +25,25 @@ enum VARIANTS {
   IMPORT = "IMPORT",
 }
 
-const INITIAL_IMPORT_RESULTS = {
+const INITIAL_IMPORT_RESULTS: ParseResult<string[]> = {
   data: [],
   errors: [],
-  meta: {},
+  // Provide a minimal meta shape; values will be overwritten by papaparse
+  meta: {
+    delimiter: ",",
+    linebreak: "\n",
+    aborted: false,
+    truncated: false,
+    cursor: 0,
+  },
 };
 
-const TransactionsPage = () => {
+const TransactionsPageContent = () => {
   const [AccountDialog, confirm] = useSelectAccount();
   const [variant, setVariant] = useState<VARIANTS>(VARIANTS.LIST);
   const [importResults, setImportResults] = useState(INITIAL_IMPORT_RESULTS);
 
-  const onUpload = (results: typeof INITIAL_IMPORT_RESULTS) => {
+  const onUpload = (results: ParseResult<string[]>) => {
     console.log({ results });
     setImportResults(results);
     setVariant(VARIANTS.IMPORT);
@@ -68,7 +76,9 @@ const TransactionsPage = () => {
       accountId: accountId as string,
     }));
 
-    createTransactions.mutate(data, {
+    const payload =
+      data as unknown as Parameters<typeof createTransactions.mutate>[0];
+    createTransactions.mutate(payload, {
       onSuccess: () => {
         onCancelImport();
       },
@@ -107,8 +117,9 @@ const TransactionsPage = () => {
 
   return (
     <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
-      <Card borderless shadowless className="drop-shadow-sm">
-        <CardHeader className="lg:grid-cols-[1fr_auto] lg:items-center lg:gap-y-0">
+      <Suspense>
+        <Card borderless shadowless className="drop-shadow-sm">
+          <CardHeader className="lg:grid-cols-[1fr_auto] lg:items-center lg:gap-y-0">
           <CardTitle className="text-xl line-clamp-1">
             Transaction History
           </CardTitle>
@@ -136,9 +147,16 @@ const TransactionsPage = () => {
             disabled={isDisabled}
           />
         </CardContent>
-      </Card>
+        </Card>
+      </Suspense>
     </div>
   );
 };
 
-export default TransactionsPage;
+export default function TransactionsPage() {
+  return (
+    <Suspense>
+      <TransactionsPageContent />
+    </Suspense>
+  );
+}

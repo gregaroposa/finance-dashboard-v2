@@ -20,10 +20,12 @@ export const useSelectAccount = (): [
 ] => {
   const accountQuery = useGetAccounts();
   const accountMutation = useCreateAccount();
-  const onCreateAccount = (name: string) =>
-    accountMutation.mutate({
-      name,
-    });
+  const onCreateAccount = (name: string) => {
+    const payload = { name } as unknown as Parameters<
+      typeof accountMutation.mutate
+    >[0];
+    accountMutation.mutate(payload);
+  };
   const accountOptions = (accountQuery.data ?? []).map((account) => ({
     label: account.name,
     value: account.id,

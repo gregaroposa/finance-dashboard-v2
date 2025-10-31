@@ -1,13 +1,15 @@
-import { format } from "date-fns";
-
 import { formatCurrency } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import type { TooltipContentProps } from "recharts";
 
-export const CategoryTooltip = ({ active, payload }: any) => {
-  if (!active) return null;
+export const CategoryTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, string>) => {
+  if (!active || !payload || payload.length === 0) return null;
 
-  const name = payload[0].payload.name;
-  const value = payload[0].value;
+  const name = (payload[0]?.payload as { name?: string })?.name ?? "";
+  const value = Number(payload[0]?.value ?? 0);
 
   return (
     <div className="rounded-sm bg-white text-black shadow-sm border overflow-hidden">

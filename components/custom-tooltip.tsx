@@ -2,13 +2,17 @@ import { format } from "date-fns";
 
 import { formatCurrency } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import type { TooltipContentProps } from "recharts";
 
-export const CustomTooltip = ({ active, payload }: any) => {
-  if (!active) return null;
+export const CustomTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, string>) => {
+  if (!active || !payload || payload.length < 2) return null;
 
-  const date = payload[0].payload.date;
-  const income = payload[0].value;
-  const expenses = payload[1].value;
+  const date = (payload[0].payload as { date: Date }).date;
+  const income = Number(payload[0].value ?? 0);
+  const expenses = Number(payload[1].value ?? 0);
 
   return (
     <div className="rounded-sm bg-white text-black shadow-sm border overflow-hidden">

@@ -4,6 +4,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import type { LegendPayload } from "recharts";
 
 import { formatCurrency } from "@/lib/utils";
 
@@ -54,21 +55,21 @@ export const RadialVariant = ({ data }: Props) => {
           verticalAlign="bottom"
           align="right"
           iconType="circle"
-          content={({ payload }: any) => {
-            const sorted = Array.isArray(payload)
-              ? [...payload].sort((a: any, b: any) => {
-                  const av = Number.isFinite(a?.payload?.value)
-                    ? a.payload.value
+          content={({ payload }: { payload?: ReadonlyArray<LegendPayload> }) => {
+            const sorted: ReadonlyArray<LegendPayload> = Array.isArray(payload)
+              ? [...payload].sort((a: LegendPayload, b: LegendPayload) => {
+                  const av = Number.isFinite((a.payload as { value?: number })?.value)
+                    ? Number((a.payload as { value?: number })?.value)
                     : 0;
-                  const bv = Number.isFinite(b?.payload?.value)
-                    ? b.payload.value
+                  const bv = Number.isFinite((b.payload as { value?: number })?.value)
+                    ? Number((b.payload as { value?: number })?.value)
                     : 0;
                   return bv - av;
                 })
               : [];
             return (
               <ul className="flex flex-col space-y-2">
-                {sorted.map((entry: any, index: number) => (
+                {sorted.map((entry, index: number) => (
                   <li
                     key={`item-${index}`}
                     className="flex items-center space-x-2"
@@ -83,7 +84,7 @@ export const RadialVariant = ({ data }: Props) => {
                       </span>
                       <span className="text-sm">
                         {(() => {
-                          const raw = entry?.payload?.value ?? 0;
+                          const raw = (entry?.payload as { value?: number })?.value ?? 0;
                           return formatCurrency(raw);
                         })()}
                       </span>
