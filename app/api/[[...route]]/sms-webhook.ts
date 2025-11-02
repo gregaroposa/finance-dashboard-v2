@@ -48,10 +48,10 @@ app.post("/", async (c) => {
     /NAKUP\s+(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}),\s+kartica\s+\*{3}(\d+),\s+znesek\s+([\d.,]+)\s+EUR,\s+([^\.]+)\./i;
   // 2) Account outflow (expense)
   const patternOdliv =
-    /^(?:\s*)Odliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Prejemnik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+    /^(?:\s*)Odliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Prejemnik:\s*([^;]+);\s*Namen:\s*([^;]+)((?:;\s*[^;]+)*)\s*;\s*Znesek:\s*([\d.,]+)\s*EUR/i;
   // 3) Account inflow (income)
   const patternPriliv =
-    /^(?:\s*)Priliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Pla[cč]nik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+    /^(?:\s*)Priliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Pla[cč]nik:\s*([^;]+);\s*Namen:\s*([^;]+)((?:;\s*[^;]+)*)\s*;\s*Znesek:\s*([\d.,]+)\s*EUR/i;
 
   const msg = message?.trim() ?? "";
   let date: Date;
@@ -74,24 +74,40 @@ app.post("/", async (c) => {
     payee = payeeStr.trim();
     accountEnvKey = `CARD_${cardSuffix}`;
   } else if (matchOdliv) {
-    const [, dateStr, ibanSuffix, prejemnik, namen, amountStr] = matchOdliv;
+    const [, dateStr, ibanSuffix, prejemnik, namen, extra, amountStr] = matchOdliv;
     date = parse(dateStr, "dd.MM.yyyy", new Date());
     const parsedValue = Math.round(
       parseFloat(amountStr.replace(/\./g, "").replace(",", ".")) * 1000
     );
     amount = -Math.abs(parsedValue); // expense
     payee = prejemnik.trim();
-    notes = namen.trim();
+    {
+      const extraNotes = (extra || "")
+        .split(";")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join(" | ");
+      const base = namen.trim();
+      notes = [base, extraNotes].filter(Boolean).join(" — ");
+    }
     accountEnvKey = `IBAN_${ibanSuffix}`;
   } else if (matchPriliv) {
-    const [, dateStr, ibanSuffix, placnik, namen, amountStr] = matchPriliv;
+    const [, dateStr, ibanSuffix, placnik, namen, extra, amountStr] = matchPriliv;
     date = parse(dateStr, "dd.MM.yyyy", new Date());
     const parsedValue = Math.round(
       parseFloat(amountStr.replace(/\./g, "").replace(",", ".")) * 1000
     );
     amount = Math.abs(parsedValue); // income
     payee = placnik.trim();
-    notes = namen.trim();
+    {
+      const extraNotes = (extra || "")
+        .split(";")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join(" | ");
+      const base = namen.trim();
+      notes = [base, extraNotes].filter(Boolean).join(" — ");
+    }
     accountEnvKey = `IBAN_${ibanSuffix}`;
   } else {
     return c.json({ error: "Could not parse message" }, 400);
