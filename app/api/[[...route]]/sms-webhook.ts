@@ -48,10 +48,10 @@ app.post("/", async (c) => {
     /NAKUP\s+(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}),\s+kartica\s+\*{3}(\d+),\s+znesek\s+([\d.,]+)\s+EUR,\s+([^\.]+)\./i;
   // 2) Account outflow (expense)
   const patternOdliv =
-    /^(?:\s*)Odliv\s+(\d{2}\.\d{2}\.\d{4});\s*Iz\s+ra[cč]una:\s*SI\d{2}\*+(\d{4});\s*Prejemnik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+    /^(?:\s*)Odliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Prejemnik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
   // 3) Account inflow (income)
   const patternPriliv =
-    /^(?:\s*)Priliv\s+(\d{2}\.\d{2}\.\d{4});\s*Iz\s+ra[cč]una:\s*SI\d{2}\*+(\d{4});\s*Pla[cč]nik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+    /^(?:\s*)Priliv\s+(\d{2}\.\d{2}\.\d{4});\s*(?:Iz\s+ra[cč]una|Ra[cč]un):\s*SI\d{2}\*+(\d{4});\s*Pla[cč]nik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
 
   const msg = message?.trim() ?? "";
   let date: Date;
