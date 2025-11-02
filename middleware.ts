@@ -1,11 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Protect everything under root (route group `(dashboard)` resolves to "/"),
-// but allow auth pages to remain public to avoid redirect loops.
-const isProtectedRoute = createRouteMatcher(["/"]); // matches all app routes
+// but explicitly allow the public SMS webhook endpoint used by Shortcuts/REST.
+const isProtectedRoute = createRouteMatcher(["/"]); // matches all app + api routes
+const isPublicRoute = createRouteMatcher(["/api/sms-webhook"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
+  if (isProtectedRoute(req) && !isPublicRoute(req)) {
     await auth.protect();
   }
 });

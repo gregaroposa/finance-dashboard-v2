@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## SMS Webhook (Bank SMS → Transactions)
+
+- Endpoint: `POST /api/sms-webhook`
+- Purpose: Accepts forwarded bank SMS payloads (via iOS Shortcuts/REST) and creates a transaction on the mapped account.
+- Auth: Public (no Clerk), secured with `SMS_WEBHOOK_SECRET` and optional `SMS_ALLOWED_SENDERS`.
+
+Environment variables:
+
+- `SMS_WEBHOOK_SECRET` — shared secret included in the POST body.
+- `SMS_ALLOWED_SENDERS` — optional, comma-separated phone numbers to allow; example: `+38640123123, +38670111222`.
+- `CARD_<SUFFIX>` — maps card suffix to an `accounts.id`. Example: `CARD_1234=acc_abc123`.
+
+Payload example:
+
+```json
+{
+  "message": "NAKUP 28.10.2025 17:24, kartica ***1234, znesek 4,50 EUR, MERCATOR.",
+  "sender": "+38640123123",
+  "secret": "<SMS_WEBHOOK_SECRET>"
+}
+```
+
+Notes:
+
+- Amounts are stored in miliunits; the system converts `4,50` → `4500`.
+- The mapped `accounts.id` determines which user owns the new transaction.
