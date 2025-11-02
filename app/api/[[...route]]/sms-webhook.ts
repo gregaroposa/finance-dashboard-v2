@@ -42,26 +42,66 @@ app.post("/", async (c) => {
     }
   }
 
-  // Regex to extract fields from the OTP banka message (Slovenian locale)
-  const pattern =
-    /NAKUP\s+(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}),\s+kartica\s+\*{3}(\d+),\s+znesek\s+([\d.,]+)\s+EUR,\s+([^\.]+)\./;
-  const match = pattern.exec(message);
-  if (!match) {
+  // Patterns:
+  // 1) Card purchase (expense)
+  const patternCard =
+    /NAKUP\s+(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}),\s+kartica\s+\*{3}(\d+),\s+znesek\s+([\d.,]+)\s+EUR,\s+([^\.]+)\./i;
+  // 2) Account outflow (expense)
+  const patternOdliv =
+    /^(?:\s*)Odliv\s+(\d{2}\.\d{2}\.\d{4});\s*Iz\s+ra[cč]una:\s*SI\d{2}\*+(\d{4});\s*Prejemnik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+  // 3) Account inflow (income)
+  const patternPriliv =
+    /^(?:\s*)Priliv\s+(\d{2}\.\d{2}\.\d{4});\s*Iz\s+ra[cč]una:\s*SI\d{2}\*+(\d{4});\s*Pla[cč]nik:\s*([^;]+);\s*Namen:\s*([^;]+);\s*Znesek:\s*([\d.,]+)\s*EUR/i;
+
+  const msg = message?.trim() ?? "";
+  let date: Date;
+  let amount: number;
+  let accountEnvKey: string | null = null;
+  let payee: string = "";
+  let notes: string | undefined;
+
+  const matchCard = patternCard.exec(msg);
+  const matchOdliv = !matchCard ? patternOdliv.exec(msg) : null;
+  const matchPriliv = !matchCard && !matchOdliv ? patternPriliv.exec(msg) : null;
+
+  if (matchCard) {
+    const [, dateStr, timeStr, cardSuffix, amountStr, payeeStr] = matchCard;
+    date = parse(`${dateStr} ${timeStr}`, "dd.MM.yyyy HH:mm", new Date());
+    const parsedValue = Math.round(
+      parseFloat(amountStr.replace(/\./g, "").replace(",", ".")) * 1000
+    );
+    amount = -Math.abs(parsedValue); // expense
+    payee = payeeStr.trim();
+    accountEnvKey = `CARD_${cardSuffix}`;
+  } else if (matchOdliv) {
+    const [, dateStr, ibanSuffix, prejemnik, namen, amountStr] = matchOdliv;
+    date = parse(dateStr, "dd.MM.yyyy", new Date());
+    const parsedValue = Math.round(
+      parseFloat(amountStr.replace(/\./g, "").replace(",", ".")) * 1000
+    );
+    amount = -Math.abs(parsedValue); // expense
+    payee = prejemnik.trim();
+    notes = namen.trim();
+    accountEnvKey = `IBAN_${ibanSuffix}`;
+  } else if (matchPriliv) {
+    const [, dateStr, ibanSuffix, placnik, namen, amountStr] = matchPriliv;
+    date = parse(dateStr, "dd.MM.yyyy", new Date());
+    const parsedValue = Math.round(
+      parseFloat(amountStr.replace(/\./g, "").replace(",", ".")) * 1000
+    );
+    amount = Math.abs(parsedValue); // income
+    payee = placnik.trim();
+    notes = namen.trim();
+    accountEnvKey = `IBAN_${ibanSuffix}`;
+  } else {
     return c.json({ error: "Could not parse message" }, 400);
   }
 
-  const [, dateStr, timeStr, cardSuffix, amountStr, payee] = match;
-  const date = parse(`${dateStr} ${timeStr}`, "dd.MM.yyyy HH:mm", new Date());
-
-  // Convert amount (e.g., "4,50") to miliunits and force expense (negative)
-  const parsedValue = Math.round(parseFloat(amountStr.replace(",", ".")) * 1000);
-  const amount = -Math.abs(parsedValue);
-
-  // Map last card digits to accountId via environment variables (CARD_<suffix>=<accountId>)
-  const envKey = `CARD_${cardSuffix}`;
-  const accountId = process.env[envKey as keyof NodeJS.ProcessEnv];
+  const accountId = accountEnvKey
+    ? (process.env[accountEnvKey as keyof NodeJS.ProcessEnv] as string | undefined)
+    : undefined;
   if (!accountId) {
-    return c.json({ error: `Unknown card suffix ${cardSuffix}` }, 400);
+    return c.json({ error: `Unknown account mapping for ${accountEnvKey}` }, 400);
   }
 
   // Ensure the mapped account exists (and implicitly ties to a single user via accounts.userId)
@@ -73,7 +113,7 @@ app.post("/", async (c) => {
     return c.json({ error: "Mapped account not found" }, 400);
   }
 
-  // Insert transaction into the database
+  // Insert transaction
   const [transaction] = await db
     .insert(transactions)
     .values({
@@ -81,6 +121,7 @@ app.post("/", async (c) => {
       date,
       payee,
       amount,
+      notes,
       accountId: account.id,
       categoryId: null,
     })

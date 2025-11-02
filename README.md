@@ -46,6 +46,7 @@ Environment variables:
 - `SMS_WEBHOOK_SECRET` — shared secret included in the POST body.
 - `SMS_ALLOWED_SENDERS` — optional, comma-separated phone numbers to allow; example: `+38640123123, +38670111222`.
 - `CARD_<SUFFIX>` — maps card suffix to an `accounts.id`. Example: `CARD_1234=acc_abc123`.
+- `IBAN_<SUFFIX>` — maps account IBAN last 4 digits to an `accounts.id`. Example: `IBAN_9148=acc_abc123`.
 
 Payload example:
 
@@ -58,6 +59,21 @@ Payload example:
 ```
 
 Notes:
+  - Amounts are stored in miliunits; `4,50` → `4500`.
+  - Card purchase (NAKUP) and outflow (Odliv) are recorded as negative (expenses).
+  - Inflow (Priliv) is recorded as positive (income).
+  - The mapped `accounts.id` determines which user owns the new transaction.
 
-- Amounts are stored in miliunits; the system converts `4,50` → `4500`.
-- The mapped `accounts.id` determines which user owns the new transaction.
+Supported message formats
+
+- Card purchase (expense):
+  `NAKUP 28.10.2025 17:24, kartica ***1234, znesek 4,50 EUR, MERCATOR.`
+  - Maps via `CARD_1234`
+
+- Account outflow (expense):
+  `Odliv 02.11.2025; Iz racuna: SI56***********9148; Prejemnik: SOMEONE; Namen: text; Znesek: 0,01 EUR OTP banka d.d.`
+  - Maps via `IBAN_9148`
+
+- Account inflow (income):
+  `Priliv 02.11.2025; Iz racuna: SI56***********9148; Placnik: SOMEONE; Namen: text; Znesek: 0,01 EUR OTP banka d.d.`
+  - Maps via `IBAN_9148`
