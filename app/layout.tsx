@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description: "A dashboard for managing finances",
   icons: {
     icon: [
+      // PNG favicon variant commonly used by some browsers (e.g., 196x196)
+      { url: "/icons/icon-196.png?v=1", sizes: "196x196", type: "image/png" },
+      // ICO variants for broad desktop compatibility
       { url: "/icons/icon-32px.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/icons/icon-48px.ico", sizes: "48x48", type: "image/x-icon" },
       { url: "/icons/icon-64px.ico", sizes: "64x64", type: "image/x-icon" },

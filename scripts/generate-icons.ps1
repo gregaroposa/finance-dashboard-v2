@@ -103,6 +103,8 @@ try {
   # Optional maskable variants with a bit more padding for safe area
   Save-ResizedWithBackground -img $img -size 192 -destPath "public/icons/icon-192-maskable.png" -bgColor $bg -paddingRatio ([Math]::Min($Padding + 0.04, 0.2))
   Save-ResizedWithBackground -img $img -size 512 -destPath "public/icons/icon-512-maskable.png" -bgColor $bg -paddingRatio ([Math]::Min($Padding + 0.04, 0.2))
+  # Common favicon PNG size some browsers look for
+  Save-Resized -img $img -size 196 -destPath "public/icons/icon-196.png"
 }
 finally {
   $img.Dispose()
