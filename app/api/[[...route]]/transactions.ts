@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Hono } from "hono";
-import { parse, subDays } from "date-fns";
+import { endOfDay, startOfDay, parse, subDays } from "date-fns";
 import { and, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
@@ -34,12 +34,17 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const defaultTo = new Date();
-      const defaultFrom = subDays(defaultTo, 30);
+      // Normalize the range to full-day boundaries to avoid excluding
+      // same-day transactions due to time/timezone differences.
+      const now = new Date();
+      const defaultTo = endOfDay(now);
+      const defaultFrom = startOfDay(subDays(now, 30));
       const startDate = from
-        ? parse(from, "yyyy-MM-dd", new Date())
+        ? startOfDay(parse(from, "yyyy-MM-dd", new Date()))
         : defaultFrom;
-      const endDate = to ? parse(to, "yyyy-MM-dd", new Date()) : defaultTo;
+      const endDate = to
+        ? endOfDay(parse(to, "yyyy-MM-dd", new Date()))
+        : defaultTo;
 
       const data = await db
         .select({
