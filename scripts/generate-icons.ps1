@@ -91,14 +91,19 @@ try {
     $bg = [System.Drawing.ColorTranslator]::FromHtml($Background)
   }
 
-  # iOS icon with solid background and slight padding
+  # iOS icons with solid background and padding
+  Save-ResizedWithBackground -img $img -size 120 -destPath "public/icons/apple-touch-icon-120x120.png" -bgColor $bg -paddingRatio $Padding
+  Save-ResizedWithBackground -img $img -size 152 -destPath "public/icons/apple-touch-icon-152x152.png" -bgColor $bg -paddingRatio $Padding
+  Save-ResizedWithBackground -img $img -size 167 -destPath "public/icons/apple-touch-icon-167x167.png" -bgColor $bg -paddingRatio $Padding
   Save-ResizedWithBackground -img $img -size 180 -destPath "public/icons/apple-touch-icon.png" -bgColor $bg -paddingRatio $Padding
 
   # Android / PWA sizes
   Save-Resized -img $img -size 192 -destPath "public/icons/icon-192.png"
   Save-Resized -img $img -size 512 -destPath "public/icons/icon-512.png"
+  # Optional maskable variants with a bit more padding for safe area
+  Save-ResizedWithBackground -img $img -size 192 -destPath "public/icons/icon-192-maskable.png" -bgColor $bg -paddingRatio ([Math]::Min($Padding + 0.04, 0.2))
+  Save-ResizedWithBackground -img $img -size 512 -destPath "public/icons/icon-512-maskable.png" -bgColor $bg -paddingRatio ([Math]::Min($Padding + 0.04, 0.2))
 }
 finally {
   $img.Dispose()
 }
-

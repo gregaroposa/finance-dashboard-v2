@@ -28,7 +28,15 @@ export const metadata: Metadata = {
       { url: "/icons/icon-48px.ico", sizes: "48x48", type: "image/x-icon" },
       { url: "/icons/icon-64px.ico", sizes: "64x64", type: "image/x-icon" },
     ],
-    apple: "/icons/apple-touch-icon.png",
+    apple: [
+      { url: "/icons/apple-touch-icon-120x120.png?v=1", sizes: "120x120" },
+      { url: "/icons/apple-touch-icon-152x152.png?v=1", sizes: "152x152" },
+      { url: "/icons/apple-touch-icon-167x167.png?v=1", sizes: "167x167" },
+      { url: "/icons/apple-touch-icon.png?v=1", sizes: "180x180" },
+    ],
+    other: [
+      { rel: "apple-touch-icon-precomposed", url: "/icons/apple-touch-icon.png?v=1" },
+    ],
   },
   manifest: "/manifest.webmanifest",
 };
