@@ -22,6 +22,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Finance Dashboard",
   description: "A dashboard for managing finances",
+  icons: {
+    icon: [
+      { url: "/icons/icon-32px.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icons/icon-48px.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/icons/icon-64px.ico", sizes: "64x64", type: "image/x-icon" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
