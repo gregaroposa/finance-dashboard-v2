@@ -35,45 +35,56 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## SMS Webhook (Bank SMS → Transactions)
+## Bank Notification & SMS Webhook (Bank Alerts → Transactions)
 
 - Endpoint: `POST /api/sms-webhook`
-- Purpose: Accepts forwarded bank SMS payloads (via iOS Shortcuts/REST) and creates a transaction on the mapped account.
+- Purpose: Accepts forwarded bank push notifications (OTP banka / mBank@Net) or legacy bank SMS payloads (via iOS Shortcuts/REST) and creates a transaction on the mapped account.
 - Auth: Public (no Clerk), secured with `SMS_WEBHOOK_SECRET` and optional `SMS_ALLOWED_SENDERS`.
 
 Environment variables:
 
 - `SMS_WEBHOOK_SECRET` — shared secret included in the POST body.
-- `SMS_ALLOWED_SENDERS` — optional, comma-separated phone numbers to allow; example: `+38640123123, +38670111222`.
+- `SMS_ALLOWED_SENDERS` — optional, comma-separated allowed senders (phone numbers or app names, matched case-insensitively without whitespace); example: `+38640123123, mBank@Net, OTP banka`.
 - `CARD_<SUFFIX>` — maps card suffix to an `accounts.id`. Example: `CARD_1234=acc_abc123`.
-- `IBAN_<SUFFIX>` — maps account IBAN last 4 digits to an `accounts.id`. Example: `IBAN_9148=acc_abc123`.
+- `IBAN_<SUFFIX>` — maps account IBAN last 4 digits to an `accounts.id`. Example: `IBAN_8483=acc_abc123`.
 
-Payload example:
+Payload example (bank app notification):
 
 ```json
 {
-  "message": "NAKUP 28.10.2025 17:24, kartica ***1234, znesek 4,50 EUR, MERCATOR.",
-  "sender": "+38640123123",
+  "title": "Odliv iz računa",
+  "message": "Odliv 11,27 EUR; Prejemnik: NOEL F.; Namen: aleks ales darilo; Racun: SI56***********8483",
+  "sender": "mBank@Net",
   "secret": "<SMS_WEBHOOK_SECRET>"
 }
 ```
 
 Notes:
-  - Amounts are stored in miliunits; `4,50` → `4500`.
-  - Card purchase (NAKUP) and outflow (Odliv) are recorded as negative (expenses).
-  - Inflow (Priliv) is recorded as positive (income).
+  - `title`, `sender`, and `date` (ISO timestamp) are optional. If the notification does not include a date, the server uses `date` (if supplied) or the current timestamp.
+  - Amounts are stored in miliunits; `11,27` → `11270`.
+  - Card purchases (`NAKUP` / `Nakup`), outflows (`Odliv`), payments (`Plačilo`), and withdrawals (`Dvig`) are recorded as negative (expenses).
+  - Inflows (`Priliv`) are recorded as positive (income).
   - The mapped `accounts.id` determines which user owns the new transaction.
 
 Supported message formats
+
+- Bank app push notification — outflow (expense):
+  `Odliv 11,27 EUR; Prejemnik: NOEL F.; Namen: aleks ales darilo; Racun: SI56***********8483`
+  - Also accepts notification title prepended on a preceding line (e.g. `Odliv iz računa\nOdliv 11,27 EUR; ...`).
+  - Maps via `IBAN_8483`
+
+- Bank app push notification — inflow (income):
+  `Priliv 1.250,00 EUR; Placnik: PODJETJE D.O.O.; Namen: Placa; Racun: SI56***********8483`
+  - Maps via `IBAN_8483`
 
 - Card purchase (expense):
   `NAKUP 28.10.2025 17:24, kartica ***1234, znesek 4,50 EUR, MERCATOR.`
   - Maps via `CARD_1234`
 
-- Account outflow (expense):
+- Legacy SMS account outflow (expense):
   `Odliv 02.11.2025; Iz racuna: SI56***********9148; Prejemnik: SOMEONE; Namen: text; Znesek: 0,01 EUR OTP banka d.d.`
   - Maps via `IBAN_9148`
 
-- Account inflow (income):
+- Legacy SMS account inflow (income):
   `Priliv 02.11.2025; Iz racuna: SI56***********9148; Placnik: SOMEONE; Namen: text; Znesek: 0,01 EUR OTP banka d.d.`
   - Maps via `IBAN_9148`
