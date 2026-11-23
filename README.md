@@ -74,7 +74,8 @@ Supported message formats
   - Maps via `IBAN_8483`
 
 - Bank app push notification — inflow (income):
-  `Priliv 1.250,00 EUR; Placnik: PODJETJE D.O.O.; Namen: Placa; Racun: SI56***********8483`
+  `Prejeli ste 2,00 EUR od MARIJA R.; Namen: PRILIV NA RACUN; (Račun SI56***********8483)`
+  (also supports `Priliv <amount> EUR; Placnik: ...; Namen: ...; Racun: SI56...`)
   - Maps via `IBAN_8483`
 
 - Card purchase (expense):

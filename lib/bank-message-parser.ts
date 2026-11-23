@@ -90,8 +90,9 @@ function normalizeMessageBody(
   //   Odliv 11,27 EUR; Prejemnik: NOEL F.; Namen: ...; Racun: SI56***********8483
   const transactionStartIdx = lines.findIndex(
     (line) =>
-      /^(?:Odliv|Priliv|Nakup|Pla[cč]ilo|Dvig)\s+[\d+-]/i.test(line) ||
-      line.includes(";")
+      /^(?:Odliv|Priliv|Nakup|Pla[cč]ilo|Dvig|Prejeli\s+ste)\s+[\d+-]/i.test(
+        line
+      ) || line.includes(";")
   );
 
   if (transactionStartIdx > 0) {
@@ -147,8 +148,28 @@ function parseSemicolonMessage(
   const firstSegment = segments[0];
   let direction: "expense" | "income" | null = null;
   let hasActionHeader = false;
+  let parsedDate: Date | null = null;
+  let amountMiliunits: number | null = null;
+  let accountEnvKey: string | null = null;
+  let payee = "";
+  let baseNote = "";
+  const extraNotes: string[] = [];
 
-  if (/^Odliv\b/i.test(firstSegment)) {
+  // New OTP banka app inflow format:
+  // "Prejeli ste 2,00 EUR od MARIJA R.; Namen: PRILIV NA RACUN; (Račun SI56***********8483)"
+  const receivedHeaderMatch =
+    /^Prejeli\s+ste\s+([+-]?\d[\d.,]*)\s*(?:EUR\b|€)(?:\s+od\s+(.+))?$/i.exec(
+      firstSegment
+    );
+
+  if (receivedHeaderMatch) {
+    direction = "income";
+    hasActionHeader = true;
+    amountMiliunits = parseEurAmountToMiliunits(receivedHeaderMatch[1]);
+    if (receivedHeaderMatch[2]) {
+      payee = receivedHeaderMatch[2].trim();
+    }
+  } else if (/^Odliv\b/i.test(firstSegment)) {
     direction = "expense";
     hasActionHeader = true;
   } else if (/^Priliv\b/i.test(firstSegment)) {
@@ -165,14 +186,7 @@ function parseSemicolonMessage(
 
   if (!direction) return null;
 
-  let parsedDate: Date | null = null;
-  let amountMiliunits: number | null = null;
-  let accountEnvKey: string | null = null;
-  let payee = "";
-  let baseNote = "";
-  const extraNotes: string[] = [];
-
-  if (hasActionHeader) {
+  if (hasActionHeader && !receivedHeaderMatch) {
     // New app push format: "Odliv 11,27 EUR" / "Priliv 1.250,00 EUR"
     // Legacy SMS format:   "Odliv 02.11.2025" / "Priliv 02.11.2025"
     const headerAmount = extractEurAmount(firstSegment);
@@ -194,8 +208,12 @@ function parseSemicolonMessage(
   const fieldSegments = hasActionHeader ? segments.slice(1) : segments;
 
   for (const segment of fieldSegments) {
+    const unwrappedSegment = segment.replace(/^\((.+)\)$/, "$1").trim();
+
     const ibanField =
-      /^(?:Iz\s+ra[cč]una|Na\s+ra[cč]un|Ra[cč]un)\s*:\s*(.+)$/i.exec(segment);
+      /^(?:Iz\s+ra[cč]una|Na\s+ra[cč]un|Ra[cč]un)(?:\s*:\s*|\s+)(.+)$/i.exec(
+        unwrappedSegment
+      );
     if (ibanField) {
       const suffix = extractIbanSuffix(ibanField[1]);
       if (suffix) {
@@ -204,7 +222,7 @@ function parseSemicolonMessage(
       continue;
     }
 
-    const cardField = /^Kartica\s*:\s*(.+)$/i.exec(segment);
+    const cardField = /^Kartica(?:\s*:\s*|\s+)(.+)$/i.exec(unwrappedSegment);
     if (cardField) {
       const suffix = extractCardSuffix(cardField[1]);
       if (suffix) {

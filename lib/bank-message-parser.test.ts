@@ -35,6 +35,33 @@ describe("parseBankMessage", () => {
     assert.equal(result.accountEnvKey, "IBAN_8483");
   });
 
+  it("parses new OTP banka app inflow push notification (Prejeli ste ...)", () => {
+    const result = parseBankMessage(
+      "Prejeli ste 2,00 EUR od MARIJA R.; Namen: PRILIV NA RACUN; (Račun SI56***********8483)",
+      { fallbackDate }
+    );
+
+    assert.ok(result);
+    assert.equal(result.amount, 2000);
+    assert.equal(result.payee, "MARIJA R.");
+    assert.equal(result.notes, "PRILIV NA RACUN");
+    assert.equal(result.accountEnvKey, "IBAN_8483");
+    assert.equal(result.date.getTime(), fallbackDate.getTime());
+  });
+
+  it("parses new inflow push notification with prepended title and without Namen", () => {
+    const result = parseBankMessage(
+      "Priliv na račun\nPrejeli ste 1.250,50 EUR od PODJETJE D.O.O.; (Račun SI56***********8483)",
+      { fallbackDate }
+    );
+
+    assert.ok(result);
+    assert.equal(result.amount, 1250500);
+    assert.equal(result.payee, "PODJETJE D.O.O.");
+    assert.equal(result.notes, undefined);
+    assert.equal(result.accountEnvKey, "IBAN_8483");
+  });
+
   it("parses new push notification for inflow (Priliv) with thousands separator and diacritics", () => {
     const result = parseBankMessage(
       "Priliv na račun\nPriliv 1.250,50 EUR; Plačnik: PODJETJE D.O.O.; Namen: Plača november; Račun: SI56***********8483",
