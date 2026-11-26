@@ -68,20 +68,29 @@ function extractEurAmount(value: string): number | null {
   return parseEurAmountToMiliunits(match[1]);
 }
 
+function normalizeUnicodeAndSpaces(text: string): string {
+  // Normalize NFD diacritics (e.g. iOS "Rac\u030Cun") to NFC ("Račun")
+  // and convert non-breaking / narrow spaces to regular spaces.
+  return text.normalize("NFC").replace(/[\u00A0\u2007\u2009\u202F]/g, " ");
+}
+
 function normalizeMessageBody(
   message: string,
   explicitTitle?: string
 ): { title: string; body: string } {
-  const lines = message
+  const normalizedMessage = normalizeUnicodeAndSpaces(message);
+  const normalizedTitle = normalizeUnicodeAndSpaces(explicitTitle || "").trim();
+
+  const lines = normalizedMessage
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
 
   if (lines.length === 0) {
-    return { title: (explicitTitle || "").trim(), body: "" };
+    return { title: normalizedTitle, body: "" };
   }
 
-  let title = (explicitTitle || "").trim();
+  let title = normalizedTitle;
   let bodyLines = lines;
 
   // When iOS Shortcuts passes Shortcut Input directly from a Notification trigger,
@@ -208,7 +217,7 @@ function parseSemicolonMessage(
   const fieldSegments = hasActionHeader ? segments.slice(1) : segments;
 
   for (const segment of fieldSegments) {
-    const unwrappedSegment = segment.replace(/^\((.+)\)$/, "$1").trim();
+    const unwrappedSegment = segment.replace(/^[(\s]+|[).\s]+$/g, "").trim();
 
     const ibanField =
       /^(?:Iz\s+ra[cč]una|Na\s+ra[cč]un|Ra[cč]un)(?:\s*:\s*|\s+)(.+)$/i.exec(

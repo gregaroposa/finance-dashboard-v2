@@ -49,6 +49,31 @@ describe("parseBankMessage", () => {
     assert.equal(result.date.getTime(), fallbackDate.getTime());
   });
 
+  it("parses EVA K. inflow and NEJC H. outflow notifications including NFD Unicode and NBSP", () => {
+    // NFD decomposed "Račun" ("Rac\u030Cun") + non-breaking spaces + trailing period
+    const inflow = parseBankMessage(
+      "Prejeli ste 200,00\u00A0EUR od EVA K.; Namen: PRILIV NA RACUN; (Rac\u030Cun\u00A0SI56***********8483).",
+      { fallbackDate }
+    );
+
+    assert.ok(inflow);
+    assert.equal(inflow.amount, 200000);
+    assert.equal(inflow.payee, "EVA K.");
+    assert.equal(inflow.notes, "PRILIV NA RACUN");
+    assert.equal(inflow.accountEnvKey, "IBAN_8483");
+
+    const outflow = parseBankMessage(
+      "Odliv 20,00 EUR; Prejemnik: NEJC H.; Namen: za penzijo za milana; Racun: SI56***********8483",
+      { fallbackDate }
+    );
+
+    assert.ok(outflow);
+    assert.equal(outflow.amount, -20000);
+    assert.equal(outflow.payee, "NEJC H.");
+    assert.equal(outflow.notes, "za penzijo za milana");
+    assert.equal(outflow.accountEnvKey, "IBAN_8483");
+  });
+
   it("parses new inflow push notification with prepended title and without Namen", () => {
     const result = parseBankMessage(
       "Priliv na račun\nPrejeli ste 1.250,50 EUR od PODJETJE D.O.O.; (Račun SI56***********8483)",

@@ -65,16 +65,25 @@ app.post("/", async (c) => {
   });
 
   if (!parsedMessage) {
-    return c.json({ error: "Could not parse message" }, 400);
+    console.warn("[sms-webhook] Could not parse message:", {
+      title,
+      message,
+      sender,
+    });
+    return c.json(
+      { error: "Could not parse message", receivedMessage: message },
+      400
+    );
   }
 
   const { date, amount, payee, notes, accountEnvKey } = parsedMessage;
 
-  const accountId = accountEnvKey
+  const rawAccountId = accountEnvKey
     ? (process.env[accountEnvKey as keyof NodeJS.ProcessEnv] as
         | string
         | undefined)
     : undefined;
+  const accountId = rawAccountId?.trim().replace(/^['"]|['"]$/g, "");
   if (!accountId) {
     return c.json(
       { error: `Unknown account mapping for ${accountEnvKey}` },
@@ -88,7 +97,18 @@ app.post("/", async (c) => {
     .from(accounts)
     .where(eq(accounts.id, accountId));
   if (!account) {
-    return c.json({ error: "Mapped account not found" }, 400);
+    console.warn("[sms-webhook] Mapped account not found:", {
+      accountEnvKey,
+      accountId,
+    });
+    return c.json(
+      {
+        error: "Mapped account not found",
+        accountEnvKey,
+        accountId,
+      },
+      400
+    );
   }
 
   // Insert transaction
